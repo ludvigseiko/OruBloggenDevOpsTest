@@ -1,0 +1,28 @@
+﻿@model OruBloggen.Models.MessageViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Skicka ett meddelande</h2>
+
+@using (Html.BeginForm("RespondToMessage", "Message", FormMethod.Post))
+{ 
+<div class="form-group">
+
+    <div style="padding-left:0px;" class="col-md-10">
+        @Html.DropDownList("Users", ViewData["Users"] as List<SelectListItem>,  new { @class = "form-control", @style = "display:none" })
+
+        @Html.Label("RE:" + Model.ReceiverName)
+    </div>
+
+    <div style="width: 100%;" class="input-group">
+        @Html.TextBoxFor(model => model.MessageTitle, new { placeholder = "Skriv din titel här.", style = "margin:5px 0px 5px 0px" })
+        @Html.TextAreaFor(model => model.MessageText, new { placeholder = "Skriv ditt meddelande här.", style = "border-radius:5px; border: solid, 1px; min-width:100%; width:100%", rows = "5" })
+    </div>
+
+        <button class="btn btn-default" id="listPosts" onclick="location.href ='@Url.Action("RespondToMessage", "Message")'">Skicka</button>
+
+    </div>
+}
+

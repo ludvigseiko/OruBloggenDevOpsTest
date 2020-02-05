@@ -1,0 +1,39 @@
+﻿@model IEnumerable<OruBloggen.Models.UserModel>
+@{
+    ViewBag.Title = "ActivateUser";
+}
+
+<h2>ActivateUser</h2>
+<table class="table">
+    <tr>
+        <th>Bild</th>
+        <th>Namn</th>
+        <th>Telefonnummer</th>
+        <th>Befattning</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>
+            <img src="/Images/@item.UserImagePath" width="50px;" />
+        </td>
+        <td>
+            @Html.DisplayFor(m => item.UserFirstname)
+            @Html.DisplayFor(m => item.UserLastname)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserPhoneNumber)
+        </td>
+        <td>
+            @Html.DisplayFor(m => item.UserPosition)
+        </td>
+        <td>
+            @Html.ActionLink("Aktivera användare", "ActivateNewUser", new { id = item.UserID })
+        </td>
+    </tr>
+
+    }
+</table>
+

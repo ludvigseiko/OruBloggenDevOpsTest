@@ -1,0 +1,48 @@
+﻿@model OruBloggen.Models.MessageViewModel
+@{
+    ViewBag.Title = "ShowMessages";
+}
+
+<h2>Inkorg</h2>
+@Html.ActionLink("Skicka nytt meddelande", "Index", "Message")
+
+
+@using (Html.BeginForm("ShowMessages", "Messages", FormMethod.Post))
+{
+    <link rel="stylesheet" type="text/css" href="~/Content/Site.css" />
+    if (Model.ListOfMessages.Count != 0)
+    {
+        foreach (var item in Model.ListOfMessages)
+        {
+            <div class="Mydiv divbutton">
+                <p><strong>Titel</strong>: @item.MessageTitle</p>
+                <p>@item.MessageText</p>
+
+                <button type="button" style="display:none" onclick="location.href ='@Url.Action("ReturnResponsePage", "Message", new { userId = item.MessageSenderID })'">Svara </button>
+            </div>
+            <br />
+        }
+    }
+    else
+    {
+        <h4>Du har inga meddelanden</h4>
+
+
+    }
+}
+
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(document).on('mouseenter', '.divbutton',
+                function () {
+                    $(this).find(":button").show();
+                }).on('mouseleave', '.divbutton', function () {
+                    $(this).find(":button").hide();
+                });
+        });
+    </script>
+}
+

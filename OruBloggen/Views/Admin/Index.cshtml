@@ -1,0 +1,69 @@
+﻿@using Microsoft.AspNet.Identity;
+@using OruBloggen.Models;
+@{
+    ViewBag.Title = "Admin Central";
+}
+@if (Utility.isAdmin(User.Identity.GetUserId()))
+{
+    <h2 style="text-align:center;">Admin Meny</h2>
+    <div class="row adminView">
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Inlägg</h3>
+            <br />
+            <img class="center-block" src="/Icons/post.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/AdminPosts">Hantera inlägg</a></p>
+        </div>
+
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Användare</h3>
+            <br />
+            <img class="center-block" src="/Icons/users.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/AllUsers">Hantera användare</a></p>
+        </div>
+
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Anmälningar</h3>
+            <br />
+            <img class="center-block" src="/Icons/report.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/ReportDetails">(@Html.Action("CountReports", "Admin")) Hantera anmälningar</a></p>
+        </div>
+
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Kategorier</h3>
+            <br />
+            <img class="center-block" src="/Icons/category.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/AdminCategories">Hantera kategorier</a></p>
+        </div>
+
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Användarförfrågningar</h3>
+            <br />
+            <img class="center-block" src="/Icons/request.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/ActivateUser">(@Html.Action("CountUnactivatedUsers", "Admin")) Hantera användarförfrågningar</a></p>
+        </div>
+
+        <div class="adminviewItem">
+            <h3 class="text-center" style="color:dimgrey;">Nyheter</h3>
+            <br />
+            <img class="center-block" src="/Icons/news.png" style="width:80px; height:auto;" />
+            <br />
+            <br />
+            <p><a class="btn btn-default center-block" href="/Admin/AdminNews">Hantera nyheter</a></p>
+        </div>
+    </div>
+
+}
+else
+{
+    <h3>Du har inte behörighet till denna sidan.</h3>
+}

@@ -1,0 +1,285 @@
+﻿@model OruBloggen.Models.ProjectViewModel
+@using Microsoft.AspNet.Identity
+
+@{
+    ViewBag.Title = "Project";
+}
+
+<h2>Projekt</h2>
+
+
+<div id="createNew" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4>Skapa nytt projekt</h4>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("CreateProject", "Project", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(p => p.NewProject.ProjectName, new { @class = "form-control", @placeholder = "Titel" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.TextAreaFor(p => p.NewProject.ProjectDesc, new { @class = "form-control", @placeholder = "Beskrivning ..." })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.Label("Välj projekttyp") @Html.DropDownList("NewProject.ProjectType", ViewData["Types"] as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.Label("Välj arbetslag") @Html.DropDownList("NewProject.ProjectTeamID", ViewData["Teams"] as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            @Html.Label("Välj status") @Html.DropDownList("NewProject.ProjectStatus", ViewData["Status"] as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            <input id="uploadFile" type="file" name="files" accept=".pdf, .doc, .docx, .xlxs, .xls, .ppt, .pptx" onchange="validateFile()" value="Ladda upp en fil" multiple />
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="sumbitProject" type="submit" class="btn btn-default">Skapa projekt</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<div style="text-align:center;">
+    <div style="display:inline-block; float:left; margin-right:5px;">@Html.DropDownList("ProjectViewModel.TeamID", ViewData["Teams"] as List<SelectListItem>, "- Filtrera på arbetslag -", new { @class = "form-control", @id = "filterTeam" })</div>
+    <div style="display:inline-block; float:left; margin-right:5px;">@Html.DropDownList("ProjectViewModel.Status", ViewData["Status"] as List<SelectListItem>, "- Filtrera på status -", new { @class = "form-control", @id = "filterStatus" })</div>
+    <div style="display:inline-block; float:left; margin-right:5px;"><button id="showAll" class="btn btn-default">Visa alla projekt</button></div>
+    <div style="display:inline-block; float:right;"><button class="btn btn-default" data-toggle="modal" data-target="#createNew">Skapa nytt projekt</button></div>
+</div>
+<br />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Projektnamn</th>
+                <th>Projekttyp</th>
+                <th>Arbetslag</th>
+                <th>Projektägare</th>
+                <th>Status</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model.ProjectList)
+            {
+                <tr id="@project.ProjectID">
+                    <td>@project.ProjectName</td>
+                    <td>@project.ProjectType</td>
+                    <td>@project.TeamName</td>
+                    <td>@project.ProjectCreatorName</td>
+                    <td>
+                        @if (User.Identity.GetUserId() == project.ProjectCreatorID)
+                        {
+                            if (project.ProjectStatus == "Ej påbörjat")
+                            {
+                                <div style="background-color:red; text-align:center; border-radius:25px; color:#333333; ">@project.ProjectStatus<a onclick="updateStatus(@project.ProjectID, '2')" style="color:grey; margin-left:5px; cursor:pointer; text-decoration:none;">&#9654;</a></div>
+                            }
+                            if (project.ProjectStatus == "Pågående")
+                            {
+                                <div style="background-color:yellow; text-align:center; border-radius:25px; color:#333333; "><a onclick="updateStatus(@project.ProjectID, '1')" style="color:grey; margin-right:5px; cursor:pointer; text-decoration:none;">&#9664;</a>@project.ProjectStatus<a onclick="updateStatus(@project.ProjectID, '3')" style="color:grey; margin-left:5px; cursor:pointer; text-decoration:none;">&#9654;</a></div>
+                            }
+                            if (project.ProjectStatus == "Avslutat")
+                            {
+                                <div style="background-color:green; text-align:center; border-radius:25px; color:#333333; "><a onclick="updateStatus(@project.ProjectID, '2')" style="color:grey; margin-right:5px; cursor:pointer; text-decoration:none;">&#9664;</a> @project.ProjectStatus</div>
+                            }
+                        }
+                        else
+                        {
+                            if (project.ProjectStatus == "Ej påbörjat")
+                            {
+                                <div style="background-color:red; text-align:center; border-radius:25px; color:#333333; ">@project.ProjectStatus</div>
+                            }
+                            if (project.ProjectStatus == "Pågående")
+                            {
+                                <div style="background-color:yellow; text-align:center; border-radius:25px; color:#333333; ">@project.ProjectStatus</div>
+                            }
+                            if (project.ProjectStatus == "Avslutat")
+                            {
+                                <div style="background-color:green; text-align:center; border-radius:25px; color:#333333; ">@project.ProjectStatus</div>
+                            }
+                        }
+                    </td>
+                    <td><a id="viewProject" style="float:right; cursor:pointer;" data-toggle="modal" data-target="#open_@project.ProjectID">Visa projekt</a></td>
+                    @if (User.Identity.GetUserId() == project.ProjectCreatorID)
+                    {
+                        <td><button type="button" class="close" onclick="removeProject(@project.ProjectID)">&times;</button></td>
+                    }
+
+                </tr>
+
+                <div id="open_@project.ProjectID" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button><br />
+                                <h4>@project.ProjectName</h4> &nbsp;
+                                <p style="font-size:x-small; float:left; margin-right:10px;">Projekttyp: @project.ProjectType</p> &nbsp;
+                                <p style="font-size:x-small; float:left; margin-right:10px;">Projektägare: @project.ProjectCreatorName</p> &nbsp;
+                                <p style="font-size:x-small; float:left;">Arbetslag: @project.TeamName</p>
+
+                                @if (project.ProjectStatus == "Ej påbörjat")
+                                {
+                                    <div style="background-color:red; text-align:center; border-radius:25px; color:#333333; float:right; margin-top:-3px; padding:2px 8px; font-size:x-small;">@project.ProjectStatus</div>
+                                }
+                                @if (project.ProjectStatus == "Pågående")
+                                {
+                                    <div style="background-color:yellow; text-align:center; border-radius:25px; color:#333333; float:right; padding:2px 8px; margin-top:-3px; font-size:x-small;">@project.ProjectStatus</div>
+                                }
+                                @if (project.ProjectStatus == "Avslutat")
+                                {
+                                    <div style="background-color:green; text-align:center; border-radius:25px; color:#333333; float:right; padding:2px 8px; margin-top:-3px; font-size:x-small;">@project.ProjectStatus</div>
+                                }
+                            </div>
+                            <div class="modal-body">
+
+                                <p id="desc_@project.ProjectDesc" style="word-wrap:break-word;">@project.ProjectDesc</p>
+
+                                @if (project.ProjectFiles != null)
+                                {
+                                    <hr />
+                                    <p style="font-size:x-small;">Uppladdade dokument</p>
+                                    foreach (var file in project.ProjectFiles)
+                                    {
+                                        <a href="/ProjectFiles/@file.FilePath" download>@file.FilePath</a><br />
+                                    }
+                                }
+
+                                <hr />
+                                <div id="commentProject">
+                                        <textarea style="width:100%; max-width:none;" id="comment_@project.ProjectID"></textarea>
+                                        <button type="button" class="btn btn-default" onclick="sendComment(@project.ProjectID)" style="float:right;">Skicka kommentar</button>
+                                </div>
+                                <div style="margin-left:5px; margin-top:40px;">
+                                    <div id="comments_@project.ProjectID">
+
+                                    </div>
+                                    @foreach (var comment in project.ProjectComments)
+                                    {
+                                    <div id="@comment.CommentID">
+                                        <h5 style="margin-bottom: 2px;"><b>@comment.UserCommentName</b></h5>
+                                        <p style="word-wrap:break-word;">@comment.Comment</p>
+                                        <div>
+                                        <p style="font-size:xx-small; margin-top:5px; float:left;">@comment.CommentDate</p> &nbsp;
+                                        @if (comment.UserCommentID == User.Identity.GetUserId() || project.ProjectCreatorID == User.Identity.GetUserId())
+                                        {
+                                            <a class="close" style="float:left; font-size: xx-small; cursor:pointer; margin-top: 7px; margin-left:5px;" onclick="removeComment(@comment.CommentID)">Ta bort kommentar</a>
+                                        }
+                                        </div>
+                                    </div>
+
+                                    }
+                                </div>
+
+
+
+                            </div>
+                            <div class="modal-footer">
+                                <button id="button" type="button" class="btn btn-default" data-dismiss="modal">Stäng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                                    }
+        </tbody>
+    </table>
+
+
+
+
+    @section scripts {
+        <script type="text/javascript">
+
+            function validateFile() {
+                var fileName = document.getElementById("uploadFile").value;
+                var idxDot = fileName.lastIndexOf(".") + 1;
+                var extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+                if (extFile == "pdf" || extFile == "docx" || extFile == "doc" || extFile == "xls" || extFile == "xlxs" || extFile == "ppt" || extFile == "pptx") {
+                } else {
+                    alert("Endast filer är godkänt. Filformat som stöds är: .pdf, .docx, .doc, .xls, .xlxs, .ppt, .pptx ");
+                    $("#uploadFile").val('');
+                }
+            }
+
+            function updateStatus(projectID, status) {
+                window.location.href = "/Project/UpdateStatus?projectID=" + projectID + "&status=" + status;
+            }
+
+            $("#filterTeam").change(function (ev) {
+                document.location.href = '/Project/FilterOnTeams?filterID=' + this.options[this.selectedIndex].value;
+            });
+
+            $("#filterStatus").change(function (ev) {
+                document.location.href = '/Project/FilterOnStatus?filterID=' + this.options[this.selectedIndex].value;
+            });
+
+            $("#showAll").click(function (ev) {
+                document.location.href = '/Project/Project';
+            });
+
+            function removeProject(id) {
+                confirm("Vill du verkligen ta bort projektet?");
+                document.location.href = '/Project/RemoveProject?projectID=' + id;
+            };
+
+            function sendComment(projectID) {
+                var textAreaID = "#comment_" + projectID;
+                var comment = $(textAreaID).val();
+                $.ajax({
+                    type: "POST",
+                    url: "/Project/CommentProject?projectID=" + projectID + "&comment=" + comment,
+                    success: function (name) {
+                        var id = "#comments_" + projectID;
+                        var day = new Date($.now()).getDate();
+                        var month = new Date($.now()).getMonth() + 1;
+                        var year = new Date($.now()).getFullYear();
+                        var hour = new Date($.now()).getHours();
+                        var minutes = new Date($.now()).getMinutes();
+                        var seconds = new Date($.now()).getSeconds();
+                        var date = year + "-" +0+month + "-" + day + " " + hour + ":" + minutes + ":" + seconds;
+
+                        var html = "<h5 style='margin-bottom: 2px;'><b>" + name + "</b></h5><p style='word-wrap:break-word;'>" + comment + "</p><p style='font-size:xx-small; margin-top:5px;'>" + date + "</p>";
+                        $(id).append(html);
+
+                        $(textAreaID).val("");
+                    }
+
+                });
+            };
+
+            function removeComment(commentID) {
+                var comment = "#" + commentID;
+                $(comment).fadeOut("slow");
+
+                $.ajax({
+                    url: '/Project/RemoveComment?commentID=' + commentID,
+                    success: function (ev) {
+                        ev.preventDefault();
+                    }
+                });
+            };
+           
+        </script>
+    }

@@ -1,0 +1,27 @@
+﻿@model OruBloggen.Models.MeetingViewModel
+@using Microsoft.AspNet.Identity;
+@using OruBloggen.Models;
+@{
+    ViewBag.Title = "PostDetails";
+}
+<h2>@Model.Meeting.MeetingTitle</h2>
+<h4>@Model.Meeting.MeetingStartDate.ToLongDateString()</h4>
+<div>
+    <hr />
+    <p>
+        <b>Mötesledare: </b> @Model.AllUsers.FirstOrDefault(p => p.UserID == Model.Meeting.MeetingUserID).UserFirstname
+        @Model.AllUsers.FirstOrDefault(p => p.UserID == Model.Meeting.MeetingUserID).UserLastname
+    </p>
+    <p><b>Tid: </b>@Model.Meeting.MeetingStartDate.ToShortTimeString() till @Model.Meeting.MeetingEndDate.ToShortTimeString()</p>
+    <p><b>Omfattning: </b>@Model.Meeting.MeetingDesc</p>
+    <p>
+        <b>Deltagare: </b>@foreach (var item in Model.Members)
+        {
+        <span> @item.UserFirstname @item.UserLastname,</span>
+        }
+    </p>
+</div>
+<p>
+    @*@Html.ActionLink("Ta bort", "DeletePost", new { id = Model.postModel.PostID }) |
+        @Html.ActionLink("Tillbaka till listan", "Posts")*@
+</p>

@@ -1,0 +1,243 @@
+﻿@model OruBloggen.Models.HomePostViewModel
+@using Microsoft.AspNet.Identity
+@using OruBloggen.Models
+
+
+<h2>Formella inlägg</h2>
+
+
+@using (Html.BeginForm("AddPost", "Post", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div>@Html.Hidden("AddPostViewModel.PostFormal", "true")</div>
+
+    <div class="userpost">
+        <div class="list-group">
+            <form id="add-post-form">
+                @Html.EditorFor(model => model.AddPostViewModel.PostTitle, new { htmlAttributes = new { placeholder = "Inläggets titel...", style = "margin-bottom: 5px; border: solid, 2px; padding: 3px;" } })
+                <div class="form-group">
+                    <div style="width: 100%;" class="input-group">
+                        @Html.TextAreaFor(model => model.AddPostViewModel.PostText, new { placeholder = "Skriv ditt inlägg...", style = "min-width: 100%; width:100%; border-radius:5px; border: solid, 1px;", rows = "5" })
+                    </div>
+                    <div id="formal" class="form-inline">
+                        <div style="float:left; width:25%">
+                            Välj en kategori: @Html.DropDownList("AddPostViewModel.PostCategory", ViewData["CategoriesFormal"] as List<SelectListItem>, new { @class = "form-control" })
+                        </div>
+                        <div style="float:left; width:20%; padding-top:0.5%">
+                            <input id="uploadFile" type="file" name="file" accept=".pdf, .doc, .docx, .xlxs, .xls, .ppt, .pptx" onchange="validateFile()" value="Ladda upp en fil" multiple/>
+                        </div>
+                        <div style="float:right; width:40%">
+                            <button type="submit" class="btn btn-success" style="float:right;">Skicka inlägg</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <br />
+        </div>
+    </div>
+}
+
+<hr />
+<div class="form-inline">
+    Filtrera inlägg: @Html.DropDownList("AddPostViewModel.PostCategory", ViewData["CategoriesFormal"] as List<SelectListItem>, new { @class = "form-control", @id = "filterBox" })
+    &nbsp;
+    <button class="btn btn-default" id="listPosts" onclick="document.location.href='/Post/FormalPost'">Lista alla inlägg</button>
+    &nbsp;
+    <button class="btn btn-default" style="float:right; margin-left:15px" id="createCategory">Skapa ny kategori</button>
+    &nbsp;
+    <input type="text" id="newCategory" placeholder="Kategorins titel" style="margin-top:4px; float:right;" />
+</div>
+<hr />
+
+<h3>Inlägg</h3>
+@if (Model.PostViewModel != null)
+{
+    foreach (var item in Model.PostViewModel)
+    {
+
+<div data-item-id="@item.PostID" class="todo-item list-group-item">
+    <div style="width:100%; display:inline-block; padding-bottom:10px;">
+
+        @if (item.PostSender == User.Identity.GetUserId() || Utility.isAdmin(User.Identity.GetUserId()))
+        {
+            <button type="button" class="close" onclick="location.href ='@Url.Action("RemoveMyPost", "Post", new { postID = item.PostID, isFormal = true})'">&times;</button>
+        }
+
+        <img id="profileImg" style="width:100px; height: 100px; float:left; margin-right:30px; border-radius: 50%;" src="/Images/@item.SenderProfilePath" /> &nbsp;
+        <a id="postlink" href="~/Manage/">
+            <h4>@item.PostSenderName</h4>
+        </a>
+        <p class="postcategory" style="font-size: x-small;">#@item.PostCategory</p>
+    </div>
+    <div>
+        <h4>@item.PostTitle</h4>
+
+        <p class="message" style="font-size: small;"> @item.PostText</p>
+
+        @if (item.PostFilePath != null)
+        {
+            foreach (var file in item.PostFilePath)
+            {
+                <a href="/PostFiles/@file.FilePath" download>Ladda ner dokument [@file.FilePath]</a><br />
+            }
+
+        }
+        <div>
+            <p class="datetime" style="font-size: xx-small; float:left;"> @item.PostDate</p> &nbsp;
+            @if (item.PostSender == User.Identity.GetUserId())
+                    {
+                        <a class="close" style="float:left; font-size: xx-small; cursor:pointer; margin-top: 2px; margin-left:5px;" data-toggle="modal" data-target="#edit_@item.PostID">Redigera inlägg</a>
+
+                    }
+            @if (Html.Action("ChangeButton", "Post", new { postID = item.PostID }) + "" == "reported")
+            {
+                <p style="float:right; font-size: xx-small; cursor:default">Inlägget anmält</p>
+            }
+            else
+            {
+                <a id="reportPost" style="float:right; font-size: xx-small; cursor:pointer;" data-toggle="modal" data-target="#@item.PostID">Anmäl inlägg</a>
+            }
+        </div>
+    </div>
+
+
+    <div id="@item.PostID" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4>Anmäl inlägg!</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="radio" name="@item.PostID" value="Olämpligt innehåll" /> Olämpligt innehåll<br />
+                    <input type="radio" name="@item.PostID" value="Inte relevant innehåll" /> Inte relevant innehåll<br />
+                    <input type="radio" name="@item.PostID" value="Upplevs diskriminerande" /> Upplevs diskriminerande<br />
+                    <input type="radio" name="@item.PostID" value="Bilden upplevs stötande" /> Bilden upplevs stötande<br />
+                </div>
+                <div class="modal-footer">
+                    <button id="sumbitReport" type="button" class="btn btn-default" onclick="getReason(@item.PostID)" data-dismiss="modal">Anmäl</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit_@item.PostID" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4>Redigera inlägg</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("ChangePost", "Post", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                    {
+                        @Html.HiddenFor(p => item.PostFormal)
+                        @Html.HiddenFor(p => item.PostID)
+
+                        <div>Ändra titel: &nbsp; @Html.EditorFor(p => item.PostTitle)</div><br />
+                        <div>Ändra text: &nbsp; @Html.TextAreaFor(p => item.PostText)</div>
+                        <hr />
+
+                        <input id="uploadMore" type="file" name="file" accept=".pdf, .doc, .docx, .xlxs, .xls, .ppt, .pptx" onchange="validateMore()" value="Ladda upp en fil" multiple />
+                        <br />
+                        <hr />
+                        <p class="warning" style="font-size:small">Ta bort filer:</p>
+                        <p class="warning" style="font-size:x-small">Filen kommer att tas bort direkt.</p>
+                        foreach (var file in item.PostFilePath)
+                        {
+
+                            if (!file.FilePath.Contains("png") || !file.FilePath.Contains("jpg") || !file.FilePath.Contains("jpeg") || !file.FilePath.Contains("gif"))
+                            {
+
+                                <div id="@file.PostFileID"><button type="button" class="close" onclick="removeFile(@file.PostFileID)">&times;</button><p>@file.FilePath</p></div>
+
+                            }
+                        }
+
+                        <div class="modal-footer">
+                            <button id="submitChanges" type="submit" class="btn btn-default" style="float:right;">Spara ändringar</button>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+    }
+}
+
+
+@section scripts {
+    <script type="text/javascript">
+
+        function removeFile(postFileID) {
+            confirm("Är du säker på att du vill ta bort bilden?");
+            var file = "#" + postFileID;
+            $(file).fadeOut("slow");
+
+            $.ajax({
+                url: '/Post/RemoveFile?postFileID=' + postFileID,
+                success: function (ev) {
+                    ev.preventDefault();
+                }
+            });
+
+
+
+        };
+
+        $("#filterBox").change(function (ev) {
+            document.location.href = '/Post/FilterPosts?filterID=' + this.options[this.selectedIndex].value + '&isFormal=' + true;
+        });
+
+        function getReason(post) {
+            var reason = $("input[name='" + post + "']:checked").val();
+            var postID = post;
+
+            if (reason != undefined) {
+                $.post('/ReportPost/ReportPost?postID=' + postID + '&reason=' + reason);
+                document.location.reload();
+            }
+            else {
+                alert("Anmälningen genomfördes ej korrekt.");
+            }
+        };
+
+        $("#createCategory").click(function () {
+            var category = $("#newCategory").val();
+            if (category != "") {
+                document.location.href = '/Post/AddCategory?category=' + category + '&isFormal=' + true;
+            }
+            else {
+                alert("Fyll i en kategori för att skapa en ny kategori.");
+            }
+        });
+
+        function validateFile() {
+            var fileName = document.getElementById("uploadFile").value;
+            var idxDot = fileName.lastIndexOf(".") + 1;
+            var extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+            if (extFile == "pdf" || extFile == "docx" || extFile == "doc" || extFile == "xls" || extFile == "xlxs" || extFile == "ppt" || extFile == "pptx") {
+            } else {
+                alert("Endast filer är godkänt. Filformat som stöds är: .pdf, .docx, .doc, .xls, .xlxs, .ppt, .pptx ");
+                $("#uploadFile").val('');
+            }
+        }
+
+        function validateMore() {
+            var fileName = document.getElementById("uploadMore").value;
+            var idxDot = fileName.lastIndexOf(".") + 1;
+            var extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+            if (extFile == "pdf" || extFile == "docx" || extFile == "doc" || extFile == "xls" || extFile == "xlxs" || extFile == "ppt" || extFile == "pptx") {
+            } else {
+                alert("Endast filer är godkänt. Filformat som stöds är: .pdf, .docx, .doc, .xls, .xlxs, .ppt, .pptx ");
+                $("#uploadMore").val('');
+            }
+        }
+
+    </script>
+}

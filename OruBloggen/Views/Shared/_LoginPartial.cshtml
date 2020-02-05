@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNet.Identity
+@using OruBloggen.Models;
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+    {
+                @Html.AntiForgeryToken()
+
+<ul class="nav navbar-nav navbar-right">
+    <li>
+        @Html.ActionLink("Min profil", "ShowInfo", "ProfilePage")
+    </li>
+    <li>
+        @Html.ActionLink("Alla användare", "ShowAllUsers", "AllUsers")
+    </li>
+    <li>
+        @Html.ActionLink("Inkorg: " + Html.Action("count", "message"), "ShowMessages", "Message")
+    </li>
+    <li>
+        @Html.ActionLink("Formella inlägg", "FormalPost", "Post")
+    </li>
+    <li>
+        @Html.ActionLink("Informella inlägg", "InformalPost", "Post")
+    </li>
+    <li>
+        @Html.ActionLink("Projekt", "Project", "Project")
+    </li>
+    <li>
+        @Html.ActionLink("Kalender", "Index", "MeetingCalendar")
+    </li>
+
+
+    @if (Request.IsAuthenticated)
+    {
+        if (Utility.isAdmin(User.Identity.GetUserId()))
+        {
+                        <li>@Html.ActionLink("Admin", "Index", "Admin")</li>
+        }
+
+
+    }
+    <li><a href="javascript:document.getElementById('logoutForm').submit()">Logga ut</a></li>
+</ul>
+         }
+    }
+
+else
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>@Html.ActionLink("Registrera", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink" })</li>
+        <li>@Html.ActionLink("Logga in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</li>
+    </ul>
+}

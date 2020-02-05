@@ -1,0 +1,70 @@
+﻿@model List<OruBloggen.Models.CategoryModel>
+
+@{
+    ViewBag.Title = "AdminCategories";
+}
+
+<h2>Hantera kategorier</h2>
+<br />
+<table class="table">
+    <tr>
+        <th>Kategori</th>
+        <th>Typ av kategori</th>
+        <th></th>
+    </tr>
+    @foreach (var category in Model)
+    {
+        if (category.CategoryID != 1 && category.CategoryID != 2)
+        {
+            <tr>
+            <td><h5 style="float: left; padding-right:50px;">@category.CategoryName</h5></td>
+            <td>
+                    @if (category.IsFormel)
+                    {
+                        <h5 style="float: left; padding-right:50px;">Formellt inlägg</h5>
+                    }
+
+                    else
+                    {
+                        <h5 style="float: left; padding-right:50px;">Informellt inlägg</h5>
+
+                    }
+                </td>
+                <td><a id="reviewPost" style="float:right; cursor:pointer;" data-toggle="modal" data-target="#@category.CategoryID">Hantera kategori</a></td>
+            </tr>
+
+            <div id="@category.CategoryID" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Hantera kategori</h4>
+                        </div>
+                        <div class="modal-body">
+                            @using (Html.BeginForm("ChangeCategory", "Admin"))
+                            {
+                                @Html.HiddenFor(id => category.CategoryID)
+
+                                <div class="form-inline">Ändra namn: @Html.EditorFor(c => category.CategoryName)</div><br />
+                                <hr />
+                                <p>@Html.Action("CountPostAtCategories", "Admin", new { categoryID = category.CategoryID }) st inlägg tillhör denna kategori.</p>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-default" style="float:right;">Spara ändringar</button>
+                                    <a class="btn btn-default" href="/Admin/RemoveCategory?id=@category.CategoryID" style="float:left;">Ta bort kategori</a>
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        }
+                </table>
+
+@section scripts {
+    <script type="text/javascript">
+
+
+    </script>
+    }

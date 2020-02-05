@@ -1,0 +1,139 @@
+﻿@model OruBloggen.Models.MeetingUserViewModel
+
+@{
+    ViewBag.Title = "ListCreatedMeetings";
+}
+
+<h2>Dina skapade möten</h2>
+
+<p>
+    @Html.ActionLink("Skapa nytt möte", "Meeting")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayName("Titel")
+        </th>
+        <th>
+            @Html.DisplayName("Beskrivning")
+        </th>
+        <th>
+            @Html.DisplayName("Startdatum")
+        </th>
+        <th>
+            @Html.DisplayName("Slutdatum")
+        </th>
+    </tr>
+
+    @foreach (var item in Model.Meetings)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.MeetingTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingDesc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingStartDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingEndDate)
+            </td>
+            <td>
+                @if (item.MeetingActive)
+                {
+                    if (DateTime.Now > item.MeetingStartDate && DateTime.Now < item.MeetingEndDate)
+                    {
+                        @Html.DisplayName("Pågående")
+                    }
+                    else
+                    {
+                        @Html.DisplayName("Kommande")
+                    }
+                }
+                else
+                {
+                    @Html.DisplayName("Avslutat/Inställt")
+                }
+            </td>
+            <td>
+                @Html.ActionLink("Details", "Details", new { meetingId = item.MeetingID }) |
+                @Html.ActionLink("Ställ in möte", "CancelMeeting",
+                    new { meetingId=item.MeetingID, title = item.MeetingTitle, startDate = item.MeetingStartDate })
+            </td>
+        </tr>
+    }
+
+</table>
+
+<h2>Inbjudningar till möten</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayName("Titel")
+        </th>
+        <th>
+            @Html.DisplayName("Beskrivning")
+        </th>
+        <th>
+            @Html.DisplayName("Startdatum")
+        </th>
+        <th>
+            @Html.DisplayName("Slutdatum")
+        </th>
+    </tr>
+
+    @foreach (var item in Model.UserMeetings)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingModel.MeetingTitle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingModel.MeetingDesc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingModel.MeetingStartDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MeetingModel.MeetingEndDate)
+            </td>
+            <td>
+                @if (item.MeetingModel.MeetingActive)
+                {
+                    if (DateTime.Now > item.MeetingModel.MeetingStartDate && DateTime.Now < item.MeetingModel.MeetingEndDate)
+                    {
+                        @Html.DisplayName("Pågående")
+                    }
+                    else
+                    {
+                        @Html.DisplayName("Kommande")
+                    }
+                }
+                else
+                {
+                    @Html.DisplayName("Avslutat/Inställt")
+                }
+            </td>
+            <td>
+                @if (item.AcceptedInvite)
+                {
+                    @Html.ActionLink("Neka", "AcceptMeeting", new { meetingId = item.MeetingID, accepted = false });
+                }
+                else
+                {
+                    @Html.ActionLink("Acceptera", "AcceptMeeting", new { meetingId = item.MeetingID, accepted = true });
+
+                }
+            </td>
+            @*<td>
+                @Html.ActionLink("Acceptera", "AcceptMeeting", new { meetingId = item.MeetingID }) |
+                @Html.ActionLink("Neka", "CancelMeeting",
+                    new { meetingId=item.MeetingID, title = item.MeetingModel.MeetingTitle, startDate = item.MeetingModel.MeetingStartDate })
+            </td>*@
+        </tr>
+    }
+
+</table>

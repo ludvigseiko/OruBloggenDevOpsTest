@@ -1,0 +1,79 @@
+﻿@model OruBloggen.Models.NewsViewModel
+@{
+    ViewBag.Title = "AdminNews";
+}
+
+<h2>AdminNews</h2>
+
+@using (Html.BeginForm("AddNews", "Admin", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="news">
+        <div class="list-group">
+            <form id="add-post-form">
+                @Html.EditorFor(n => n.News.NewsTitle, new { htmlAttributes = new { placeholder = "Nyhetens titel", style = "margin-bottom: 5px; border: solid, 2px; padding: 3px;" } })
+                <div class="form-group">
+                    <div style="width: 100%;" class="input-group">
+                        @Html.TextAreaFor(n => n.News.NewsText, new { placeholder = "Skriv en nyhet...", style = "min-width: 100%; width:100%; border-radius:5px; border: solid, 1px;", rows = "5" })
+                    </div>
+                    <div id="news" class="form-inline">
+                        <div style="float:right; width:40%">
+                            <button type="submit" class="btn btn-success" style="float:right;">Posta nyhet</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+<br />
+<br />
+
+<table class="table">
+    <tr>
+        <th>Titel</th>
+        <th>Nyhet</th>
+        <th>Postad</th>
+        <th></th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model.NewsList)
+    {
+        <tr>
+            <td><h5 style="float: left; padding-right:50px;">@item.NewsTitle</h5></td>
+            <td><h5 style="float: left; padding-right:50px;">@item.NewsText</h5></td>
+            <td><h5 style="float: left; padding-right:50px;">@item.NewsDate</h5></td>
+            <td><a id="reviewPost" style="float:right; cursor:pointer;" data-toggle="modal" data-target="#@item.NewsID">Läs nyhet</a></td>
+            <td><a style="float:right; cursor:pointer;" onclick="DeclineNews(@item.NewsID)">Ta bort nyheten</a></td>
+        </tr>
+
+        <div id="@item.NewsID" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h5>@item.NewsTitle</h5>
+                        <p style="font-size: x-small;">@item.NewsDate</p>
+                    </div>
+                    <div class="modal-body">
+                        <p>@item.NewsText</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</table>
+
+@section scripts {
+    <script type="text/javascript">
+
+        function DeclineNews(newsID) {
+            confirm("Är du säker på att du vill ta bort nyheten?");
+            location.href = '/Admin/DeclineNews?newsID=' + newsID;
+        };
+
+    </script>
+
+
+}
